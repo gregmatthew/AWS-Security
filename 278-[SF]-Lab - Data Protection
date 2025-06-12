@@ -1,0 +1,515 @@
+278-[SF]-Lab - Data Protection
+AWS Data Protection Lab: Using Encryption
+
+This lab guides you through the process of using AWS Key Management Service (KMS) and the AWS Encryption CLI to encrypt and decrypt data on an Amazon EC2 instance. Below is a detailed walkthrough of the lab, including setup, tasks, and outcomes.
+
+Lab Overview
+
+Cryptography transforms communicated information into a secret code to ensure confidentiality, authentication, data integrity, and nonrepudiation. The core function of cryptography is encryption, which converts data into an unreadable form (ciphertext) to maintain privacy. Decryption reverses this process, transforming ciphertext back into readable plaintext.
+
+In this lab, you will:
+
+
+
+
+
+Connect to a file server hosted on an Amazon EC2 instance.
+
+
+
+Configure the AWS Encryption CLI on the instance.
+
+
+
+Create an encryption key using AWS KMS.
+
+
+
+Encrypt and decrypt text files using the KMS key.
+
+Objectives
+
+By the end of this lab, you will be able to:
+
+
+
+
+
+Create an AWS KMS encryption key.
+
+
+
+Install the AWS Encryption CLI.
+
+
+
+Encrypt plaintext data.
+
+
+
+Decrypt ciphertext data.
+
+Duration
+
+Approximately 45 minutes.
+
+Lab Environment
+
+The lab includes a preconfigured EC2 instance named File Server with an attached AWS Identity and Access Management (IAM) role, allowing connection via AWS Systems Manager Session Manager. All backend components (EC2 instances, IAM roles, etc.) are pre-built.
+
+
+
+Task 1: Create an AWS KMS Key
+
+In this task, you create a symmetric AWS KMS key to encrypt and decrypt data. AWS KMS is a secure service that uses hardware security modules (HSMs) validated under FIPS 140-2 to protect cryptographic keys.
+
+Steps
+
+
+
+
+
+Access the AWS Management Console:
+
+
+
+
+
+At the upper-right corner of the lab instructions, click Start Lab.
+
+
+
+Wait for the lab status to show a green circle next to AWS, indicating the lab is ready.
+
+
+
+Click the green circle to open the AWS Management Console in a new browser tab (auto-signed in).
+
+
+
+If prompted, switch to the new Console Home.
+
+
+
+Arrange the console tab alongside the instructions for easy reference.
+
+
+
+Note: Do not change the AWS Region unless instructed.
+
+
+
+Create the KMS Key:
+
+
+
+
+
+In the AWS Console, search for KMS and select Key Management Service.
+
+
+
+Click Create a key.
+
+
+
+Select Symmetric as the key type and click Next.
+Symmetric encryption uses the same key for encryption and decryption, making it fast and efficient.
+
+
+
+On the Add labels page, configure:
+
+
+
+
+
+Alias: MyKMSKey
+
+
+
+Description: Key used to encrypt and decrypt data files
+
+
+
+Click Next.
+
+
+
+On the Define key administrative permissions page, select the checkbox for voclabs in the Key administrators section, then click Next.
+
+
+
+On the Define key usage permissions page, select the checkbox for voclabs in the This account section, then click Next.
+
+
+
+Review the settings and click Finish.
+
+
+
+Click the link for MyKMSKey and copy the ARN (Amazon Resource Name) to a text editor for later use.
+
+Summary
+
+You created a symmetric AWS KMS key and assigned ownership to the pre-created voclabs IAM role.
+
+
+
+Task 2: Configure the File Server Instance
+
+In this task, you configure AWS credentials on the File Server EC2 instance and install the AWS Encryption CLI to enable encryption and decryption operations.
+
+Steps
+
+
+
+
+
+Connect to the EC2 Instance:
+
+
+
+
+
+In the AWS Console, search for EC2 and select EC2.
+
+
+
+In the instances list, select the File Server instance and click Connect.
+
+
+
+On the Session Manager tab, click Connect.
+
+
+
+Configure AWS Credentials:
+
+
+
+
+
+Run the following commands to change to the home directory and create the AWS credentials file:
+
+cd ~
+aws configure
+
+
+
+When prompted, enter:
+
+
+
+
+
+AWS Access Key ID: 1 (press Enter).
+
+
+
+AWS Secret Access Key: 1 (press Enter).
+
+
+
+Default region name: Copy and paste the Region from the Vocareum AWS Details page (use Ctrl+Shift+V to paste in Session Manager).
+
+
+
+Default output format: Press Enter.
+
+
+
+The AWS configuration file is created with temporary placeholders.
+
+
+
+Update AWS Credentials:
+
+
+
+
+
+In the Vocareum console, click the AWS Details button and select Show next to AWS CLI.
+
+
+
+Copy the code block starting with [default] to a text editor.
+
+
+
+In the File Server terminal, open the credentials file:
+
+vi ~/.aws/credentials
+
+
+
+Delete the file contents by typing dd multiple times.
+
+
+
+Paste the code block copied from Vocareum.
+
+
+
+Save and close the file by pressing Esc, typing :wq, and pressing Enter.
+
+
+
+Verify the file contents:
+
+cat ~/.aws/credentials
+
+The file should include aws_access_key_id, aws_secret_access_key, and aws_session_token.
+
+
+
+Install AWS Encryption CLI:
+
+
+
+
+
+Run the following commands to install the AWS Encryption CLI and update the path:
+
+pip3 install aws-encryption-sdk-cli
+export PATH=$PATH:/home/ssm-user/.local/bin
+
+Summary
+
+You configured the AWS credentials file to use the KMS key and installed the AWS Encryption CLI for running encryption commands.
+
+
+
+Task 3: Encrypt and Decrypt Data
+
+In this task, you create a text file with mock sensitive data, encrypt it using the AWS KMS key, and then decrypt it to view the original contents.
+
+Steps
+
+
+
+
+
+Create Text Files:
+
+
+
+
+
+Create three text files and add content to one:
+
+touch secret1.txt secret2.txt secret3.txt
+echo 'TOP SECRET 1!!!' > secret1.txt
+
+
+
+Verify the contents of secret1.txt:
+
+cat secret1.txt
+
+
+
+Create an Output Directory:
+
+
+
+
+
+Create a directory for encrypted files:
+
+mkdir output
+
+
+
+Set the KMS Key ARN:
+
+
+
+
+
+Copy the following command to a text editor and replace (KMS ARN) with the ARN copied in Task 1:
+
+keyArn=(KMS ARN)
+
+
+
+Run the updated command in the File Server terminal to store the ARN in the keyArn variable.
+
+
+
+Encrypt the File:
+
+
+
+
+
+Encrypt secret1.txt using the AWS Encryption CLI:
+
+aws-encryption-cli --encrypt \
+  --input secret1.txt \
+  --wrapping-keys key=$keyArn \
+  --metadata-output --metadata \
+  --encryption-context purpose=test \
+  --commitment-policy require-encrypt-require-decrypt \
+  --output ./output/
+
+
+
+Command Explanation:
+
+
+
+
+
+--encrypt: Specifies the encryption operation.
+
+
+
+--input secret1.txt: Indicates the file to encrypt.
+
+
+
+--wrapping-keys key=$keyArn: Uses the KMS key specified by the ARN.
+
+
+
+--metadata-output --metadata: Saves metadata about the encryption.
+
+
+
+--encryption-context purpose=test: Adds an encryption context for security.
+
+
+
+--commitment-policy require-encrypt-require-decrypt: Enforces key commitment.
+
+
+
+--output ./output/: Writes the encrypted file to the output directory.
+
+
+
+The command produces no output if successful.
+
+
+
+Verify Encryption:
+
+
+
+
+
+Check if the command succeeded (returns 0 for success):
+
+echo $?
+
+
+
+List the encrypted file:
+
+ls output
+
+Expected output: secret1.txt.encrypted
+
+
+
+View the encrypted file (ciphertext):
+
+cd output
+cat secret1.txt.encrypted
+
+The contents are unreadable, confirming successful encryption.
+
+
+
+Decrypt the File:
+
+
+
+
+
+Decrypt secret1.txt.encrypted:
+
+aws-encryption-cli --decrypt \
+  --input secret1.txt.encrypted \
+  --wrapping-keys key=$keyArn \
+  --commitment-policy require-encrypt-require-decrypt \
+  --encryption-context purpose=test \
+  --metadata-output --metadata \
+  --max-encrypted-data-keys 1 \
+  --buffer \
+  --output .
+
+
+
+List the decrypted file:
+
+ls
+
+Expected output: secret1.txt.encrypted.decrypted
+
+
+
+View the decrypted file:
+
+cat secret1.txt.encrypted.decrypted
+
+The original plaintext (TOP SECRET 1!!!) is now readable.
+
+Summary
+
+You encrypted a plaintext file into ciphertext using the AWS Encryption CLI and KMS key, then decrypted it back to its original form.
+
+
+
+Diagrams
+
+Encryption Process
+
+A symmetric key and algorithm convert plaintext into ciphertext, making the data unreadable without decryption.
+
+Decryption Process
+
+The same symmetric key and algorithm are used to decrypt ciphertext back into readable plaintext.
+
+
+
+Conclusion
+
+Congratulations! You have successfully:
+
+
+
+
+
+Created an AWS KMS encryption key.
+
+
+
+Installed the AWS Encryption CLI.
+
+
+
+Encrypted plaintext data.
+
+
+
+Decrypted ciphertext back to plaintext.
+
+Ending the Lab
+
+
+
+
+
+Click End Lab at the top of the lab page.
+
+
+
+Confirm by selecting Yes.
+
+
+
+Verify the Ended AWS Lab Successfully message.
+
+This lab demonstrates the power of AWS KMS and the AWS Encryption CLI for securing sensitive data through encryption.
