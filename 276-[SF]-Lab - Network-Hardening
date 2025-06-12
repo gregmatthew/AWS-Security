@@ -1,0 +1,488 @@
+Network Hardening Using Amazon Inspector and AWS Systems Manager
+
+Lab Overview
+
+Securing an infrastructure can be a challenge for any company. Companies use many tools to audit networks and find vulnerabilities in systems and applications, a process that takes significant time and effort.
+
+In this lab, you are a new security engineer for AnyCompany. Your goal is to identify weak areas in the company's network security and update AnyCompany's environment for better efficiency and optimization using Amazon Inspector.
+
+Amazon Inspector runs scans that analyze network configurations—such as security groups, network access control lists (network ACLs), route tables, and internet gateways—to infer reachability without sending packets across the virtual private cloud (VPC) network or connecting to Amazon Elastic Compute Cloud (Amazon EC2) instance network ports. This is akin to packetless network mapping and reconnaissance.
+
+Using Amazon Inspector’s network reachability package, you will analyze network configurations to identify security vulnerabilities in EC2 instances. The findings provide guidance on restricting insecure access.
+
+Objectives
+
+After completing this lab, you should be able to:
+
+
+
+
+
+Configure Amazon Inspector
+
+
+
+Run an agentless network audit
+
+
+
+Investigate the scan results
+
+
+
+Update security groups
+
+
+
+Log in to an application server instance using AWS Systems Manager Session Manager
+
+Duration
+
+This lab requires approximately 45 minutes to complete.
+
+Lab Environment
+
+The lab environment consists of two EC2 instances:
+
+
+
+
+
+BastionServer: A bastion server in a public subnet, used to manage access to an internal or private network from an external network. Bastion servers, also called jump boxes or jump servers, run minimal services to reduce their attack surface and are commonly used to proxy and log communications, such as Secure Shell (SSH) sessions.
+
+
+
+AppServer: An application server in a private subnet.
+
+All backend components, including Amazon EC2, AWS Identity and Access Management (IAM) roles, and some AWS services, are pre-built for this lab.
+
+Accessing the AWS Management Console
+
+
+
+
+
+At the upper-right corner of the instructions, choose Start Lab.
+
+
+
+
+
+Troubleshooting tip: If you get an Access Denied error, close the error box and choose Start Lab again.
+
+
+
+Check the lab status:
+
+
+
+
+
+A red circle next to AWS at the upper-left corner indicates the lab is starting.
+
+
+
+A green circle indicates the lab is ready. Wait for this before proceeding.
+
+
+
+Choose the green circle next to AWS to open the AWS Management Console in a new browser tab. The system automatically signs you in.
+
+
+
+
+
+Tip: If a new tab doesn’t open, check for a banner or icon at the top of your browser indicating that pop-ups are blocked. Allow pop-ups for the site.
+
+
+
+If prompted to switch to the new Console Home, click Switch to the new Console Home.
+
+
+
+Arrange the AWS Management Console tab alongside the instructions for easy reference.
+
+
+
+Do not change the lab Region unless specifically instructed.
+
+Task 1: View EC2 Instances and Add Tags
+
+To create an assessment target for Amazon Inspector Classic, you start by tagging the EC2 instances to include in the target. In this task, you tag the BastionServer instance.
+
+
+
+
+
+In the AWS Management Console, choose Services and select EC2.
+
+
+
+If the New EC2 Experience is visible at the upper-left, ensure it is selected. This lab uses the new Amazon EC2 console.
+
+
+
+In the left navigation pane, choose Instances. The running BastionServer and AppServer EC2 instances are listed.
+
+
+
+Select the BastionServer instance.
+
+
+
+Choose the Tags tab.
+
+
+
+Choose Manage tags.
+
+
+
+Choose Add tag and enter:
+
+
+
+
+
+Key: Securityscan
+
+
+
+Value: true
+
+
+
+Choose Save.
+
+Summary of Task 1
+
+You successfully applied tags to the BastionServer instance, enabling the security scan to identify and scan this instance.
+
+Task 2: Configure and Run Amazon Inspector
+
+In this task, you run an agentless network audit on your EC2 instances using Amazon Inspector with the network reachability rules package. This method is useful when installing agents on all hosts is not feasible or when operating systems do not support Amazon Inspector agents.
+
+
+
+
+
+In the AWS Management Console, choose Services, then Security, Identity, & Compliance, and select Inspector.
+
+
+
+Open the navigation pane by choosing the menu icon (≡) on the left.
+
+
+
+Choose Switch to Inspector Classic.
+
+
+
+Choose Get started.
+
+
+
+Choose Advanced setup.
+
+
+
+In the Define an assessment target section, configure:
+
+
+
+
+
+Name: Network-Audit
+
+
+
+Clear the check box for All Instances.
+
+
+
+Tags: Key: Securityscan
+
+
+
+Tags: Value: true
+
+
+
+Clear the check box for Install Agents.
+
+
+
+Choose Next.
+
+
+
+In the Define an assessment template section, configure:
+
+
+
+
+
+Name: Assessment-Template-Network
+
+
+
+Rules packages: Keep Network Reachability-1.1 selected, and remove other packages by choosing the X next to each.
+
+
+
+Duration: 15 Minutes
+
+
+
+Clear the check box for Assessment Schedule.
+
+
+
+Choose Next.
+
+
+
+Choose Create. A SUCCESS notification confirms the assessment run has started. It takes about 3–5 minutes to complete.
+
+
+
+While waiting, learn more about Amazon Inspector.
+
+
+
+Check the scan status:
+
+
+
+
+
+In the left navigation pane, choose Assessment runs.
+
+
+
+In the Amazon Inspector - Assessment Runs section, expand the row for your run.
+
+
+
+Choose Show status to view the status. If not visible, choose the refresh icon at the top.
+
+
+
+Choose Close to return to the previous screen.
+
+
+
+Once the status changes to Analysis complete, choose Findings in the left navigation pane.
+
+Summary of Task 2
+
+You created an assessment target (a collection of AWS resources for Amazon Inspector Classic to analyze) and an assessment template (a blueprint for configuring the assessment). You used the template to start an assessment run, which monitors and analyzes the resources, resulting in a set of findings.
+
+Task 3: Analyze Amazon Inspector Findings
+
+The findings from the network reachability rules show whether ports are reachable from the internet through an internet gateway (including instances behind Application Load Balancers or Classic Load Balancers), a VPC peering connection, or a virtual private network (VPN) through a virtual gateway. They also highlight network configurations that allow potentially malicious access, such as mismanaged security groups, ACLs, and internet gateways.
+
+
+
+
+
+Expand the high-severity finding. Key details include:
+
+
+
+
+
+AWS agent ID: Identifies the affected EC2 instance.
+
+
+
+Description: Indicates TCP port 23 (Telnet) is reachable from the internet.
+
+
+
+Recommendation: Provides remediation suggestions.
+
+
+
+Note: Telnet is a text-based terminal emulation utility in the TCP/IP suite, allowing remote command execution as if on the console. It is insecure due to unencrypted data.
+
+
+
+Expand the medium-severity findings:
+
+
+
+
+
+TCP port 22 (SSH) is reachable from the internet.
+
+
+
+Note: SSH, unlike Telnet, provides a secure, encrypted tunnel for remote access, but open access still poses risks.
+
+Task 4: Update Security Groups
+
+In this task, you address the security findings by updating the BastionServer security group to lock down port 22 to specific IP addresses and remove port 23.
+
+
+
+
+
+Expand the details of the high-severity finding.
+
+
+
+In the Recommendation section, choose the link to the security group (e.g., sgOb2dc685cd6e6e706) to view the BastionServerSG security group.
+
+
+
+Choose the Inbound rules tab to view the current rules, which correspond to the high and medium findings.
+
+
+
+Choose Edit inbound rules.
+
+
+
+For the inbound rule for port 23 (Telnet), choose Delete. Telnet is vulnerable, and SSH is the preferred protocol for secure access.
+
+
+
+For the SSH rule, remove the inbound IP address 0.0.0.0/0 by choosing the X next to it. This address allows access from anyone on the internet.
+
+
+
+For Source, select Custom from the dropdown, then choose My IP.
+
+
+
+Choose Save rules.
+
+Re-scan the Environment
+
+
+
+
+
+In the Amazon Inspector browser tab, choose Assessment templates in the left navigation pane.
+
+
+
+Select the check box for Assessment-Template-Network and choose Run. The scan takes approximately 30–90 seconds.
+
+
+
+Choose Assessment runs in the left navigation pane and refresh every 10–15 seconds until the Status changes to Analysis complete.
+
+
+
+Choose Findings and sort by Date to view the most recent findings. The high-severity finding (port 23) is resolved, but the medium-severity finding (port 22) remains, as it is still accessible to your IP address outside the VPC.
+
+Summary of Task 4
+
+You updated the BastionServer security group to allow traffic from only your IP address and removed the insecure Telnet port (23).
+
+Task 5: Replace BastionServer with Systems Manager
+
+In this task, you replace the BastionServer’s SSH-based access to the AppServer with AWS Systems Manager Session Manager, a secure solution that eliminates the need for open inbound ports, bastion hosts, or SSH key management.
+
+
+
+
+
+In the AWS Management Console,:choose Services and select EC2.
+
+
+
+In the left navigation pane, choose Security Groups.
+
+
+
+Select the Security group ID for BastionServerSG.
+
+
+
+Choose Edit inbound rules, delete the SSH rule, and choose Save rules.
+
+
+
+In the left navigation pane, choose Instances.
+
+
+
+Select the check box for BastionServer, choose Instance state, and select Stop instance. Confirm by choosing Stop.
+
+
+
+Select the check box for AppServer and choose Connect to connect directly using Session Manager.
+
+
+
+Enter the following Linux commands to change the directory and view the current working directory:
+
+cd ~
+pwd
+
+The output should be: /home/ssm-user.
+
+Final Scan of the Environment
+
+
+
+
+
+In the Amazon Inspector browser tab, choose Assessment runs in the left navigation pane.
+
+
+
+Select the check box for the previous assessment and choose Run.
+
+
+
+Wait for the Status to show Analysis complete, then expand the details of the most recent assessment run.
+
+
+
+Verify that there are zero findings.
+
+Summary of Task 5
+
+You improved network security by adding an IAM role to the AppServer, removing the SSH inbound rule from the BastionServer security group, and using Session Manager for secure, simplified access.
+
+Conclusion
+
+Congratulations! You have successfully:
+
+
+
+
+
+Configured Amazon Inspector
+
+
+
+Run an agentless network audit
+
+
+
+Investigated the scan results
+
+
+
+Updated security groups
+
+
+
+Logged in to an application server using Session Manager
+
+Lab Complete
+
+
+
+
+
+Choose End Lab at the top of the page and select Yes to confirm.
+
+
+
+An Ended AWS Lab Successfully message will briefly display, indicating the lab has ended.
