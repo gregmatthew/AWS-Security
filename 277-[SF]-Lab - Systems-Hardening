@@ -1,0 +1,624 @@
+277-[SF]-Lab - Systems-Hardening
+AWS Systems Hardening Lab with Patch Manager
+
+Lab Overview
+
+In organizations managing hundreds or thousands of workstations, keeping operating systems (OS) and applications updated is logistically challenging. Administrators need a clear security policy and baseline to ensure all workstations meet minimum software version requirements. This lab utilizes Patch Manager, a capability of AWS Systems Manager, to create and apply patch baselines. You will:
+
+
+
+
+
+Patch Linux EC2 instances using a default baseline.
+
+
+
+Create a custom patch baseline for Windows EC2 instances.
+
+
+
+Use patch groups to apply the custom baseline to Windows instances.
+
+
+
+Verify patch compliance.
+
+Objectives
+
+By the end of this lab, you will be able to:
+
+
+
+
+
+Patch Linux instances using the default baseline.
+
+
+
+Create a custom patch baseline.
+
+
+
+Use patch groups to patch Windows instances with the custom baseline.
+
+
+
+Verify patch compliance.
+
+Duration
+
+Approximately 60 minutes.
+
+Lab Environment
+
+The lab environment includes:
+
+
+
+
+
+Six EC2 instances: Three with Linux OS and three with Windows OS.
+
+
+
+Pre-configured backend components, including EC2 instances, IAM roles, and AWS services.
+
+
+
+Task 1: Patch Linux Instances Using Default Baselines
+
+In this task, you patch Linux EC2 instances using the default baseline for Amazon Linux 2.
+
+Steps
+
+
+
+
+
+Access the AWS Management Console:
+
+
+
+
+
+At the upper-right corner, choose Start Lab.
+
+
+
+Wait for the lab status to show a green circle (indicating readiness) next to AWS.
+
+
+
+Choose the green circle to open the AWS Management Console in a new browser tab.
+
+
+
+If prompted, switch to the new Console Home.
+
+
+
+Arrange the console tab alongside these instructions for easy reference.
+
+
+
+Note: Do not change the lab Region unless instructed.
+
+
+
+Navigate to Systems Manager:
+
+
+
+
+
+In the AWS Management Console search bar, enter Systems Manager and select it.
+
+
+
+In the left navigation pane, under Node Management, choose Fleet Manager.
+
+
+
+View the pre-configured EC2 instances (three Linux, three Windows) with associated IAM roles for Systems Manager.
+
+
+
+View Linux Instance Details:
+
+
+
+
+
+Select the checkbox next to Linux-1.
+
+
+
+From the Node actions dropdown, choose View details to see details like Platform type, Node type, OS name, and IAM role.
+
+
+
+Return to the Systems Manager homepage by choosing AWS Systems Manager at the top.
+
+
+
+Patch Linux Instances:
+
+
+
+
+
+In the left navigation pane, under Node Management, choose Patch Manager.
+
+
+
+If prompted, choose Start with an overview (skip if not displayed).
+
+
+
+Choose Patch now to use the AWS-AmazonLinux2DefaultPatchBaseline.
+
+
+
+Configure the following under Basic configuration:
+
+
+
+
+
+Patching operation: Scan and install
+
+
+
+Reboot option: Reboot if needed
+
+
+
+Instances to patch: Patch only the target instances I specify
+
+
+
+Target selection: Specify instance tags
+
+
+
+Tag key: Patch Group
+
+
+
+Tag value: Linuxprod
+
+
+
+Choose Add.
+
+
+
+Choose Patch now.
+
+
+
+Monitor the AWS-PatchNowAssociation panel for the status of the three affected instances.
+
+
+
+Check the Scan/Install operation summary panel until the patch operation completes.
+
+
+
+Task 2: Create a Custom Patch Baseline for Windows Instances
+
+In this task, you create a custom patch baseline for Windows security updates.
+
+Steps
+
+
+
+
+
+Navigate to Patch Manager:
+
+
+
+
+
+In the AWS Management Console search bar, enter Systems Manager and select it.
+
+
+
+In the left navigation pane, under Node Management, choose Patch Manager.
+
+
+
+If prompted, choose Start with an overview (skip if not displayed).
+
+
+
+Create a Patch Baseline:
+
+
+
+
+
+Choose the Patch baselines tab, then select Create patch baseline.
+
+
+
+Configure Patch baseline details:
+
+
+
+
+
+Name: WindowsServerSecurityUpdates
+
+
+
+Description: Windows security baseline patch
+
+
+
+Operating system: Windows
+
+
+
+Leave Default patch baseline unselected.
+
+
+
+Configure Approval Rules:
+
+
+
+
+
+In the Approval rules for operating systems section:
+
+
+
+
+
+Rule 1:
+
+
+
+
+
+Products: Select WindowsServer2019, deselect All.
+
+
+
+Severity: Choose Critical.
+
+
+
+Classification: Choose SecurityUpdates.
+
+
+
+Auto-approval: Enter 3 days.
+
+
+
+Compliance reporting: Choose Critical.
+
+
+
+Rule 2:
+
+
+
+
+
+Choose Add rule.
+
+
+
+Products: Select WindowsServer2019, deselect All.
+
+
+
+Severity: Choose Important.
+
+
+
+Classification: Choose SecurityUpdates.
+
+
+
+Auto-approval: Enter 3 days.
+
+
+
+Compliance reporting: Choose High.
+
+
+
+Choose Create patch baseline.
+
+
+
+Modify Patch Groups:
+
+
+
+
+
+In the Patch baselines section, select the WindowsServerSecurityUpdates baseline (use the search bar or navigate to the second page if needed).
+
+
+
+From the Actions dropdown, choose Modify patch groups.
+
+
+
+Under Patch groups, enter WindowsProd.
+
+
+
+Choose Add, then Close.
+
+
+
+Task 3: Patch Windows Instances
+
+In this task, you patch Windows instances using the custom patch baseline and associated tags.
+
+Task 3.1: Tagging Windows Instances
+
+
+
+
+
+Navigate to EC2:
+
+
+
+
+
+In the AWS Management Console search bar, enter EC2 and select it.
+
+
+
+Choose Instances, select the checkbox next to Windows-1, then choose the Tags tab.
+
+
+
+Add Tags:
+
+
+
+
+
+Choose Manage tags, then Add new tag.
+
+
+
+Configure:
+
+
+
+
+
+Key: Patch Group
+
+
+
+Value: WindowsProd
+
+
+
+Choose Save.
+
+
+
+Repeat for Windows-2 and Windows-3 instances.
+
+Task 3.2: Patching Windows Instances
+
+
+
+
+
+Navigate to Patch Manager:
+
+
+
+
+
+In the AWS Management Console search bar, enter Systems Manager and select it.
+
+
+
+Choose Patch Manager.
+
+
+
+If prompted, choose Start with an overview (skip if not displayed).
+
+
+
+Patch Windows Instances:
+
+
+
+
+
+Choose Patch now.
+
+
+
+Configure:
+
+
+
+
+
+Patching operation: Scan and install
+
+
+
+Reboot option: Reboot if needed
+
+
+
+Instances to patch: Patch only the target instances I specify
+
+
+
+Target selection: Specify instance tags
+
+
+
+Tag key: Patch Group
+
+
+
+Tag value: WindowsProd
+
+
+
+Choose Add.
+
+
+
+Choose Patch now.
+
+
+
+Monitor Patching:
+
+
+
+
+
+When available, choose the Execution ID link to view the State Manager page.
+
+
+
+Select the Output link for an instance with inProgress status.
+
+
+
+Expand the Output panel to view details, including PatchGroup: WindowsProd.
+
+
+
+Note: Patch Manager uses the Run Command to execute the RunPatchBaseline document.
+
+
+
+Task 4: Verify Compliance
+
+In this task, you verify that all instances are compliant with the applied patch baselines.
+
+Steps
+
+
+
+
+
+Navigate to Patch Manager:
+
+
+
+
+
+In the left navigation pane, under Node Management, choose Patch Manager.
+
+
+
+Check Compliance:
+
+
+
+
+
+Choose the Dashboard tab.
+
+
+
+Under Compliance summary, verify that Compliant: 6 is displayed (indicating all three Linux and three Windows instances are compliant).
+
+
+
+Choose the Compliance reporting tab to view the compliance status of all instances (should show ✓ Compliant).
+
+
+
+Scroll right in the Node patching details panel to verify:
+
+
+
+
+
+Critical noncompliant count
+
+
+
+Security noncompliant count
+
+
+
+Other noncompliant count
+
+
+
+Last operation date
+
+
+
+Baseline ID
+
+
+
+View Patch Details:
+
+
+
+
+
+Choose the Node ID for a Windows instance.
+
+
+
+On the Node ID page, select the Patch tab.
+
+
+
+Scroll to view applied patches and their installed Time.
+
+
+
+Conclusion
+
+You have successfully:
+
+
+
+
+
+Patched Linux instances using the default baseline.
+
+
+
+Created a custom patch baseline for Windows instances.
+
+
+
+Used patch groups to patch Windows instances with the custom baseline.
+
+
+
+Verified patch compliance for all instances.
+
+End Lab
+
+
+
+
+
+Choose End Lab at the top of the page, then select Yes to confirm.
+
+
+
+Verify the Ended AWS Lab Successfully message is displayed.
