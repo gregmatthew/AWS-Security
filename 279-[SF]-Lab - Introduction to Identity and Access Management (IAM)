@@ -1,0 +1,570 @@
+279-[SF]-Lab - Introduction to Identity and Access Management (IAM)
+Introduction to AWS Identity and Access Management (IAM) Lab
+
+This lab introduces AWS Identity and Access Management (IAM), focusing on managing users, user groups, and policies to control access to AWS resources. The lab simulates a business environment where access control and authentication are critical to secure resources like EC2 instances and S3 buckets.
+
+Objectives
+
+After completing this lab, you will be able to:
+
+
+
+
+
+Create and apply an IAM password policy
+
+
+
+Explore pre-created IAM users and user groups
+
+
+
+Inspect IAM policies applied to user groups
+
+
+
+Add users to user groups with specific capabilities
+
+
+
+Locate and use the IAM sign-in URL
+
+
+
+Experiment with the effects of policies on service access
+
+Duration
+
+Approximately 60 minutes
+
+Accessing the AWS Management Console
+
+
+
+
+
+Choose Start Lab in the upper-right corner of the lab instructions.
+
+
+
+
+
+Troubleshooting tip: If you encounter an Access Denied error, close the error box and choose Start Lab again.
+
+
+
+Monitor the lab status:
+
+
+
+
+
+Red circle: Lab has not started.
+
+
+
+Yellow circle: Lab is starting.
+
+
+
+Green circle: Lab is ready.
+
+
+
+Once the lab is ready, choose the green circle next to AWS to open the AWS Management Console in a new browser tab.
+
+
+
+
+
+Tip: If the tab doesn’t open, check for a browser banner or icon blocking pop-ups and allow them.
+
+
+
+If prompted, switch to the new Console Home.
+
+
+
+Arrange the AWS Management Console tab alongside the lab instructions for easy reference.
+
+
+
+Do not change the lab Region unless instructed.
+
+Task 1: Create an Account Password Policy
+
+In this task, you create a custom password policy for your AWS account that applies to all associated users.
+
+Steps
+
+
+
+
+
+Note the Region displayed in the upper-right corner of the console (e.g., Oregon).
+
+
+
+In the AWS Management Console, search for IAM in the search bar and select it.
+
+
+
+In the left navigation pane, choose Account settings.
+
+
+
+Choose Change password policy.
+
+
+
+Configure the following password policy options:
+
+
+
+
+
+Enforce minimum password length: Set to 10 characters.
+
+
+
+Select all checkboxes except Password expiration requires administrator reset.
+
+
+
+Enable password expiration: Keep default of 90 days.
+
+
+
+Prevent password reuse: Keep default of 5 passwords.
+
+
+
+Choose Save changes.
+
+Summary
+
+You strengthened the account’s password requirements, making user passwords more secure and harder to crack.
+
+Task 2: Explore Users and User Groups
+
+In this task, you explore pre-created IAM users and user groups.
+
+Steps
+
+
+
+
+
+In the left navigation pane, choose Users. The following users are pre-created:
+
+
+
+
+
+user-1
+
+
+
+user-2
+
+
+
+user-3
+
+
+
+Select user-1 to view its Summary page.
+
+
+
+
+
+Permissions tab: No permissions assigned.
+
+
+
+Groups tab: Not a member of any groups.
+
+
+
+Security credentials tab: Assigned a console password.
+
+
+
+In the left navigation pane, choose User groups. The following groups are pre-created:
+
+
+
+
+
+EC2-Admin
+
+
+
+EC2-Support
+
+
+
+S3-Support
+
+
+
+Select EC2-Support and view the Permissions tab.
+
+
+
+
+
+Attached policy: AmazonEC2ReadOnlyAccess
+
+
+
+Expand the policy to view permissions for listing and describing EC2, ELB, CloudWatch, and Auto Scaling resources (read-only access).
+
+
+
+Review the IAM policy structure:
+
+{
+    "Effect": "Allow" or "Deny",
+    "Action": ["cloudwatch:ListMetrics", ...],
+    "Resource": ["specific S3 bucket", "specific EC2 instance", "*"]
+}
+
+
+
+Select S3-Support and view the Permissions tab.
+
+
+
+
+
+Attached policy: AmazonS3ReadOnlyAccess
+
+
+
+Grants permissions to get and list S3 resources.
+
+
+
+Select EC2-Admin and view the Permissions tab.
+
+
+
+
+
+Attached policy: Customer inline policy (EC2-Admin-Policy)
+
+
+
+Grants permissions to view (Describe), start, and stop EC2 instances.
+
+Summary
+
+You explored pre-created users and groups, inspected their attached policies, and understood the differences between managed and inline policies.
+
+Business Scenario
+
+Your company is expanding its AWS usage with EC2 instances and S3 storage. Assign permissions to new staff based on their job functions:
+
+
+
+
+
+
+
+User
+
+
+
+Group
+
+
+
+Permissions
+
+
+
+
+
+user-1
+
+
+
+S3-Support
+
+
+
+Read-only access to Amazon S3
+
+
+
+
+
+user-2
+
+
+
+EC2-Support
+
+
+
+Read-only access to Amazon EC2
+
+
+
+
+
+user-3
+
+
+
+EC2-Admin
+
+
+
+View, start, and stop EC2 instances
+
+Task 3: Add Users to User Groups
+
+In this task, you assign users to groups to inherit the necessary permissions.
+
+Steps
+
+
+
+
+
+Add user-1 to S3-Support:
+
+
+
+
+
+In the left navigation pane, choose User groups.
+
+
+
+Select S3-Support and go to the Users tab.
+
+
+
+Choose Add users, select user-1, and confirm.
+
+
+
+Add user-2 to EC2-Support:
+
+
+
+
+
+Repeat the above steps for user-2 and the EC2-Support group.
+
+
+
+Add user-3 to EC2-Admin:
+
+
+
+
+
+Repeat the above steps for user-3 and the EC2-Admin group.
+
+
+
+Verify each group has one user in the Users column.
+
+Summary
+
+You successfully added users to their respective groups, aligning permissions with their job roles.
+
+Task 4: Sign In and Test User Permissions
+
+In this task, you test the permissions of each IAM user using the IAM sign-in URL.
+
+Steps
+
+
+
+
+
+In the left navigation pane, choose Dashboard and copy the Sign-in URL (e.g., https://123456789012.signin.aws.amazon.com/console) to a text editor.
+
+
+
+Open a private browser window:
+
+
+
+
+
+Firefox: Menu > New Private Window
+
+
+
+Chrome: Ellipsis > New Incognito Window
+
+
+
+Edge: Ellipsis > New InPrivate Window
+
+
+
+Internet Explorer: Tools > InPrivate Browsing
+
+
+
+Paste the Sign-in URL into the private window and press Enter.
+
+
+
+Test user-1 (S3-Support):
+
+
+
+
+
+Sign in with:
+
+
+
+
+
+Username: user-1
+
+
+
+Password: Lab-Password1
+
+
+
+From the Services menu, choose S3, select a bucket, and browse its contents (should succeed).
+
+
+
+From the Services menu, choose EC2 > Instances (should fail with “You are not authorized”).
+
+
+
+Sign out.
+
+
+
+Test user-2 (EC2-Support):
+
+
+
+
+
+Sign in with:
+
+
+
+
+
+Username: user-2
+
+
+
+Password: Lab-Password2
+
+
+
+Choose EC2 > Instances (should display instances but fail to stop them with “You are not authorized”).
+
+
+
+Choose S3 (should fail with “You don’t have permissions to list buckets”).
+
+
+
+Sign out.
+
+
+
+Test user-3 (EC2-Admin):
+
+
+
+
+
+Sign in with:
+
+
+
+
+
+Username: user-3
+
+
+
+Password: Lab-Password3
+
+
+
+Choose EC2 > Instances, select an instance, and choose Stop instance (should succeed, instance enters Stopping state).
+
+
+
+Close the private window.
+
+Summary
+
+You verified that:
+
+
+
+
+
+user-1 can view S3 buckets but not EC2 instances.
+
+
+
+user-2 can view EC2 instances but cannot modify them or access S3.
+
+
+
+user-3 can view and stop EC2 instances.
+
+Conclusion
+
+You successfully:
+
+
+
+
+
+Created and applied an IAM password policy
+
+
+
+Explored pre-created IAM users and groups
+
+
+
+Inspected IAM policies
+
+
+
+Added users to groups with specific permissions
+
+
+
+Used the IAM sign-in URL
+
+
+
+Tested the effects of policies on service access
+
+Ending the Lab
+
+
+
+
+
+Choose End Lab at the top of the lab page and confirm with Yes.
+
+
+
+Verify the Ended AWS Lab Successfully message.
