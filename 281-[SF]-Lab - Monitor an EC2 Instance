@@ -1,0 +1,422 @@
+281-[SF]-Lab - Monitor an EC2 Instance
+AWS EC2 Monitoring Lab: CloudWatch and SNS Configuration
+
+This lab demonstrates how to monitor an Amazon EC2 instance using Amazon CloudWatch and Amazon Simple Notification Service (SNS). The lab involves creating a CloudWatch alarm to monitor CPU utilization, setting up an SNS notification, stress-testing an EC2 instance, and creating a CloudWatch dashboard. The lab simulates a scenario where a malicious actor spikes CPU usage, triggering an alarm and notification.
+
+Lab Overview
+
+
+
+
+
+Duration: Approximately 60 minutes
+
+
+
+Environment: Preconfigured EC2 instance named "Stress Test" with an attached IAM role for AWS Systems Manager Session Manager.
+
+
+
+Objectives:
+
+
+
+
+
+Create an Amazon SNS notification.
+
+
+
+Configure a CloudWatch alarm.
+
+
+
+Stress test an EC2 instance.
+
+
+
+Confirm SNS email notification.
+
+
+
+Create a CloudWatch dashboard.
+
+Task 1: Configure Amazon SNS
+
+This task sets up an SNS topic and subscribes an email address to receive notifications.
+
+
+
+
+
+Access the AWS Management Console:
+
+
+
+
+
+Click Start Lab at the upper-right corner of the lab instructions.
+
+
+
+Wait for the lab status to show a green circle next to "AWS," indicating the lab is ready.
+
+
+
+Click the green circle to open the AWS Management Console in a new browser tab.
+
+
+
+If prompted, switch to the new Console Home.
+
+
+
+Arrange the browser tabs to view instructions and the console side by side.
+
+
+
+Note: Do not change the AWS Region unless instructed.
+
+
+
+Create an SNS topic:
+
+
+
+
+
+In the AWS Management Console, search for SNS and select Simple Notification Service.
+
+
+
+Navigate to Topics in the left pane and click Create topic.
+
+
+
+Configure the topic:
+
+
+
+
+
+Type: Standard
+
+
+
+Name: MyCwAlarm
+
+
+
+Click Create topic.
+
+
+
+Subscribe to the SNS topic:
+
+
+
+
+
+On the MyCwAlarm details page, go to the Subscriptions tab and click Create subscription.
+
+
+
+Configure the subscription:
+
+
+
+
+
+Topic ARN: Leave default.
+
+
+
+Protocol: Select Email.
+
+
+
+Endpoint: Enter a valid email address you can access.
+
+
+
+Click Create subscription.
+
+
+
+Check your email for an AWS Notification Subscription Confirmation message and click Confirm subscription.
+
+
+
+Verify in the AWS Console that the subscription status is Confirmed under Subscriptions.
+
+Summary: You created an SNS topic and subscribed an email address to receive notifications.
+
+Task 2: Create a CloudWatch Alarm
+
+This task configures a CloudWatch alarm to monitor CPU utilization of the Stress Test EC2 instance.
+
+
+
+
+
+Access CloudWatch:
+
+
+
+
+
+In the AWS Management Console, search for CloudWatch and select it.
+
+
+
+Navigate to Metrics > All metrics.
+
+
+
+Select EC2 metrics:
+
+
+
+
+
+Choose EC2 > Per-Instance Metrics.
+
+
+
+Select the checkbox for CPUUtilization for the Stress Test EC2 instance.
+
+
+
+Note: Metrics may take 5-10 minutes to appear after EC2 instance creation.
+
+
+
+Create the alarm:
+
+
+
+
+
+Click Create alarm and configure the following:
+
+
+
+
+
+Metric:
+
+
+
+
+
+Metric name: CPUUtilization
+
+
+
+InstanceId: Leave default.
+
+
+
+Statistic: Average
+
+
+
+Period: 1 minute
+
+
+
+Conditions:
+
+
+
+
+
+Threshold type: Static
+
+
+
+Whenever CPUUtilization is: Greater > threshold
+
+
+
+than: 60
+
+
+
+Alarm name: LabCPUUtilizationAlarm
+
+
+
+Alarm description: CloudWatch alarm for Stress Test EC2 instance CPU utilization
+
+
+
+Review and click Create alarm.
+
+Summary: You created a CloudWatch alarm that triggers when CPU utilization exceeds 60%.
+
+Task 3: Test the CloudWatch Alarm
+
+This task stress-tests the EC2 instance to trigger the CloudWatch alarm and SNS notification.
+
+
+
+
+
+Connect to the EC2 instance:
+
+
+
+
+
+In the Vocareum console, click AWS Details and copy the EC2InstanceURL.
+
+
+
+Paste the URL into a new browser tab to connect to the Stress Test instance via AWS Systems Manager.
+
+
+
+Stress the CPU:
+
+
+
+
+
+Run the following command in the terminal:
+
+sudo stress --cpu 10 --verbose --timeout 400s
+
+
+
+This command runs for 400 seconds, spiking CPU usage to 100%.
+
+
+
+Monitor CPU usage:
+
+
+
+
+
+Open another browser tab with the EC2InstanceURL and run:
+
+top
+
+
+
+This displays live CPU usage.
+
+
+
+Check the CloudWatch alarm:
+
+
+
+
+
+In the AWS Console, navigate to CloudWatch > Alarms and select LabCPUUtilizationAlarm.
+
+
+
+Refresh the graph every minute until the alarm status changes to In alarm (may take a few minutes).
+
+
+
+Verify that CPU utilization exceeds 60% on the graph.
+
+
+
+Confirm SNS notification:
+
+
+
+
+
+Check your email inbox for a notification from AWS Notifications indicating the alarm state.
+
+Summary: You stress-tested the EC2 instance, triggered the CloudWatch alarm, and received an SNS email notification.
+
+Task 4: Create a CloudWatch Dashboard
+
+This task creates a CloudWatch dashboard to monitor CPU utilization.
+
+
+
+
+
+Access CloudWatch dashboards:
+
+
+
+
+
+In the AWS Console, navigate to CloudWatch > Dashboards.
+
+
+
+Click Create dashboard and enter the name LabEC2Dashboard.
+
+
+
+Add a widget:
+
+
+
+
+
+Select Line as the widget type and click Metrics.
+
+
+
+Choose EC2 > Per-Instance Metrics.
+
+
+
+Select the checkbox for Stress Test instance and CPUUtilization metric. _presage
+
+
+
+Click Create widget.
+
+
+
+Click Save dashboard.
+
+Summary: You created a CloudWatch dashboard to monitor the CPU utilization of the Stress Test instance.
+
+Conclusion
+
+In this lab, you:
+
+
+
+
+
+Created an SNS topic and email subscription.
+
+
+
+Configured a CloudWatch alarm for CPU utilization.
+
+
+
+Stress-tested an EC2 instance to trigger the alarm.
+
+
+
+Confirmed the SNS notification.
+
+
+
+Created a CloudWatch dashboard for monitoring.
+
+This lab simulates a scenario where high CPU usage, potentially caused by malware, triggers monitoring alerts, demonstrating AWS monitoring and notification services.
+
+Ending the Lab
+
+
+
+
+
+Click End Lab in the Vocareum console and confirm to terminate the lab.
